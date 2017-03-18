@@ -60,3 +60,21 @@ if you wish to boot using qemu, follow the steps at the link above to get the xi
     -kernel <path>/uImage -dtb <path>/devicetree.dtb --initrd <path>/uramdisk.image.gz`
 
 and you should now see the system boot on the emulated zynq processor core
+
+
+# Running modified OpenSSL/cryptodev code 
+The Cryptodev-linux module has to be used in order to give openSSL access to our accelerators. It enables userspace application access to Crypto API backend modules already present in the kernel.
+
+Since such API is not available by default on Linux distributions, the OpenSSL has to be recompiled with additional flags:
+
+cd /path/to/cryptodev-linux
+./configure -DHAVE_CRYPTODEV -DUSE_CRYPTODEV_DIGESTS
+make
+sudo make install
+
+apt-get source openssl
+cd openssl-*/
+sed -i -e "s/CONFARGS  =/CONFARGS = -DHAVE_CRYPTODEV -DUSE_CRYPTODEV_DIGESTS/" debian/rules
+dch -i "Enabled cryptodev support"
+debuild
+sudo dpkg -i ../openssl*.deb
