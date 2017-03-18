@@ -39,8 +39,7 @@ to drop into the u-boot shell, run:
 You should now see the prompt as 
 `zynq> `
 
-
-#BOOTING ON AN EMULATOR
+# BOOTING ON AN EMULATOR
 
 https://github.com/Xilinx/qemu
 
