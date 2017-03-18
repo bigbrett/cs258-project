@@ -1,0 +1,12 @@
+Usage
+=====
+    make
+    insmod aesdriver.ko
+
+
+Test
+====
+    modprobe cryptodev
+    make
+    insmod aesdriver.ko
+    ./test
