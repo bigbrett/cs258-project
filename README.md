@@ -1,6 +1,14 @@
 # cs258-project
 
 This repository hosts an attempt to integrate an FPGA-based hardware accelerator for use in the openSSL cryptosystem. The design is intended to run on the Xilinx Zynq SoC, and has been tested for use on the Digilent Zybo board. The directory structure is as follows. 
+ 
+##cs258proj
+	`.openssl/` : source code for openssl which can needs to be rebuilt to allow cryptodev engine support using instructions on their website
+	`.cryptodev/` : source code for cryptodev api for reference
+	`.zybo_linux/` : the source for the linux kernel with driver support for the magical hardware block that is beyond the scope of this class
+
+
+
 
 Note: requires *Vivado Design Suite 2016.4* and a Linux distribution. Has been tested with the Xilinx fork of the linux kernel, which can be found at https://github.com/Xilinx/linux-xlnx, and the Xilinx fork of U-boot which can be found at https://github.com/Xilinx/u-boot-xlnx. However, for testing I used the Digilent (licenced Xilinx silicon partner) forks of the respective Xilinx repos, as they offer board-level support. However, for the sake of compiling and running on an emulation layer, the precise source shouldn't matter, and could even use the mainline kernel release.
 
