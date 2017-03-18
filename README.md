@@ -2,7 +2,7 @@
 
 This repository hosts an attempt to integrate an FPGA-based hardware accelerator for use in the openSSL cryptosystem. The design is intended to run on the Xilinx Zynq SoC, and has been tested for use on the Digilent Zybo board. The directory structure is as follows. 
  
-##cs258proj
+## cs258proj
 	`.openssl/` : source code for openssl which can needs to be rebuilt to allow cryptodev engine support using instructions on their website
 	`.cryptodev/` : source code for cryptodev api for reference
 	`.zybo_linux/` : the source for the linux kernel with driver support for the magical hardware block that is beyond the scope of this class
