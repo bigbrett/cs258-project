@@ -3,9 +3,9 @@
 This repository hosts an attempt to integrate an FPGA-based hardware accelerator for use in the openSSL cryptosystem. The design is intended to run on the Xilinx Zynq SoC, and has been tested for use on the Digilent Zybo board. The directory structure is as follows. 
  
 ## cs258proj
-	`.openssl/` : source code for openssl which can needs to be rebuilt to allow cryptodev engine support using instructions on their website
-	`.cryptodev/` : source code for cryptodev api for reference
-	`.zybo_linux/` : the source for the linux kernel with driver support for the magical hardware block that is beyond the scope of this class
+	.openssl/ : source code for openssl which can needs to be rebuilt to allow cryptodev engine support using instructions on their website
+	.cryptodev/ : source code for cryptodev api for reference
+	.zybo_linux/ : the source for the linux kernel with driver support for the magical hardware block that is beyond the scope of this class
 
 Note: requires *Vivado Design Suite 2016.4* and a Linux distribution. Has been tested with the Xilinx fork of the linux kernel, which can be found at https://github.com/Xilinx/linux-xlnx, and the Xilinx fork of U-boot which can be found at https://github.com/Xilinx/u-boot-xlnx. However, for testing I used the Digilent (licenced Xilinx silicon partner) forks of the respective Xilinx repos, as they offer board-level support. However, for the sake of compiling and running on an emulation layer, the precise source shouldn't matter, and could even use the mainline kernel release.
 
@@ -54,10 +54,13 @@ https://github.com/Xilinx/qemu
 
 if you wish to boot using qemu, follow the steps at the link above to get the xilinx fork of qemu, and then run the following command from the qemu directory
 
-`./aarch64-softmmu/qemu-system-aarch64 \
-    -M arm-generic-fdt-plnx -machine linux=on \
-    -serial /dev/null -serial mon:stdio -display none \
-    -kernel <path>/uImage -dtb <path>/devicetree.dtb --initrd <path>/uramdisk.image.gz`
+	./aarch64-softmmu/qemu-system-aarch64 \
+	
+		-M arm-generic-fdt-plnx -machine linux=on \
+		
+		-serial /dev/null -serial mon:stdio -display none \
+		
+		-kernel <path>/uImage -dtb <path>/devicetree.dtb --initrd <path>/uramdisk.image.gz
 
 and you should now see the system boot on the emulated zynq processor core
 
@@ -67,14 +70,14 @@ The Cryptodev-linux module has to be used in order to give openSSL access to our
 
 Since such API is not available by default on Linux distributions, the OpenSSL has to be recompiled with additional flags:
 
-cd /path/to/cryptodev-linux
-./configure -DHAVE_CRYPTODEV -DUSE_CRYPTODEV_DIGESTS
-make
-sudo make install
-
-apt-get source openssl
-cd openssl-*/
-sed -i -e "s/CONFARGS  =/CONFARGS = -DHAVE_CRYPTODEV -DUSE_CRYPTODEV_DIGESTS/" debian/rules
-dch -i "Enabled cryptodev support"
-debuild
-sudo dpkg -i ../openssl*.deb
+	cd /path/to/cryptodev-linux
+	./configure -DHAVE_CRYPTODEV -DUSE_CRYPTODEV_DIGESTS
+	make
+	sudo make install
+	
+	apt-get source openssl
+	cd openssl-*/
+	sed -i -e "s/CONFARGS  =/CONFARGS = -DHAVE_CRYPTODEV -DUSE_CRYPTODEV_DIGESTS/" debian/rules
+	dch -i "Enabled cryptodev support"
+	debuild
+	sudo dpkg -i ../openssl*.deb
