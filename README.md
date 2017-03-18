@@ -22,7 +22,7 @@ Partition SDCard
     fdisk /dev/mmcblk0
     mkfs.vfat -n "BOOTFS" -F 32 /dev/mmcblk0p1
     mkfs.ext4 -L "ROOTFS" /dev/mmcblk0p2
-    cp sd_card/* /media/BOOTFS
+    cp zybo_linux/sd_image/* /media/BOOTFS
 
 Reset QSPI flash
 ================
