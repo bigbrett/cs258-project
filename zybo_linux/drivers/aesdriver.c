@@ -257,7 +257,7 @@ static struct platform_driver aesdriver_platform_driver = {
 };
 
 module_platform_driver(aesdriver_platform_driver);
-MODULE_AUTHOR("Brett Nicholas");
+MODULE_AUTHOR("Brett Nicholas, based on Lauri Vosandi's code");
 MODULE_DESCRIPTION("AES acceleration");
 MODULE_LICENSE("DGAF License");
 
