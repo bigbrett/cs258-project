@@ -246,30 +246,25 @@ static int aeshw_remove(struct platform_device *pdev)
 	release_mem_region(phys_addr, remap_size);
 	crypto_unregister_alg(&aeshw_cbc_alg);
 	crypto_unregister_alg(&aeshw_ecb_alg);
-	printk(KERN_INFO "Removed aeshw device!\n");
+	printk(KERN_INFO "Removed aes accelerator!\n");
 	return 0;
 }
 
-static struct of_device_id aeshw_of_match[] = {
-	{ .compatible = "aeshw,aeshw-1.00.a", },
-	{}
-};
 
 MODULE_DEVICE_TABLE(of, aeshw_of_match);
 
 static struct platform_driver aeshw_platform_driver = {
 	.probe = aeshw_probe,
 	.remove = aeshw_remove,
-	.driver = {
-		.name = "aeshw",
-		.owner = THIS_MODULE,
-		.of_match_table = of_match_ptr(aeshw_of_match),
+	.driver = { .name = "aeshw",
+		    .owner = THIS_MODULE,
+		    .of_match_table = of_match_ptr(aeshw_of_match),
 	},
 };
 
 module_platform_driver(aeshw_platform_driver);
 
-MODULE_AUTHOR("Angelo Haller");
-MODULE_DESCRIPTION("AES hardware acceleration");
-MODULE_LICENSE("Dual BSD/GPL");
+MODULE_AUTHOR("Brett Nicholas");
+MODULE_DESCRIPTION("AES acceleration");
+MODULE_LICENSE("DGAF License");
 
