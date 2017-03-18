@@ -18,20 +18,37 @@ environment:
 
 
 Partition SDCard
-=========
+==================
     fdisk /dev/mmcblk0
     mkfs.vfat -n "BOOTFS" -F 32 /dev/mmcblk0p1
     mkfs.ext4 -L "ROOTFS" /dev/mmcblk0p2
-    cp zybo_linux/sd_image/* /media/BOOTFS
+
+
+Load SDCard
+==================
+Copy BOOT.BIN, devicetree.dtb, uImage and uramdisk.image.gz to the first partition of an SD card, as shown in the first image 
+NOTE: The first partition of the SD card is usually mounted to /media/BOOTFS
+
 
 Reset QSPI flash
 ================
-
 Reset old u-boot configs: connect to device via serial port, press any key during startup
 to drop into the u-boot shell, run:
-
     env default -a
     saveenv
-
 You should now see the prompt as 
 `zynq> `
+
+
+#BOOTING ON AN EMULATOR
+
+https://github.com/Xilinx/qemu
+
+if you wish to boot using qemu, follow the steps at the link above to get the xilinx fork of qemu, and then run the following command from the qemu directory
+
+`./aarch64-softmmu/qemu-system-aarch64 \
+    -M arm-generic-fdt-plnx -machine linux=on \
+    -serial /dev/null -serial mon:stdio -display none \
+    -kernel <path>/uImage -dtb <path>/devicetree.dtb --initrd <path>/uramdisk.image.gz`
+
+and you should now see the system boot on the emulated zynq processor core
