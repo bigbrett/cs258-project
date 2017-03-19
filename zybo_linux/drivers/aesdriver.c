@@ -1,3 +1,10 @@
+/*
+ *
+ * This is a driver for an AES hardware accelerator in PL targeting the 
+ * Xilinx Zynq SoC. The actual HDL code for the accelerator is not 
+ * included, since it is irrelevant to the course. 
+ *
+ */
 #include <linux/kernel.h>
 #include <linux/init.h>
 #include <linux/module.h>
@@ -8,15 +15,8 @@
 
 enum AES_MODE {
 	AES_MODE_ENCRYPT = 0,
-	AES_MODE_DECRYPT = 0x0000FFFF,
-	AES_MODE_SET_KEY = 0xFFFF0000,
-};
-
-enum OFFSET {
-	OFFSET_DIN  = 0x0,
-	OFFSET_DOUT = 0x10,
-	OFFSET_CTL  = 0x20,
-	OFFSET_STAT = 0x24,
+	AES_MODE_DECRYPT = 1,
+	AES_MODE_SET_KEY = 2
 };
 
 unsigned long remap_size;
@@ -29,18 +29,19 @@ unsigned long *virt_addr;
 void 
 aesdriver_write(const void *src, enum AES_MODE mode)
 {
-	memcpy_toio((u8*)virt_addr + OFFSET_DIN, src, AES_BLOCK_SIZE);
-	iowrite32(mode, (u8*)virt_addr + OFFSET_CTL);
+	// write the data to the hardware core through the memory map 
+	memcpy_toio((u8*)virt_addr, src, AES_BLOCK_SIZE);
+	iowrite32(mode, (u8*)virt_addr);
 
-	// blocking 
-	while (ioread32((u8*)virt_addr + OFFSET_STAT) == 0) { } 
+	// Chill for a bit and let the block do its thing
+	while (ioread32((u8*)virt_addr) == 0) { } 
 }
 
 
 void 
 aesdriver_read(void *dst)
 {
-	memcpy_fromio(dst, (u8*)virt_addr + OFFSET_DOUT, AES_BLOCK_SIZE);
+	memcpy_fromio(dst, (u8*)virt_addr, AES_BLOCK_SIZE);
 }
 
 
@@ -257,7 +258,7 @@ static struct platform_driver aesdriver_platform_driver = {
 };
 
 module_platform_driver(aesdriver_platform_driver);
-MODULE_AUTHOR("Brett Nicholas, based on Lauri Vosandi's code");
+MODULE_AUTHOR("Brett Nicholas, (heavily) inspired by Lauri Vosandi's code");
 MODULE_DESCRIPTION("AES acceleration");
 MODULE_LICENSE("DGAF License");
 
