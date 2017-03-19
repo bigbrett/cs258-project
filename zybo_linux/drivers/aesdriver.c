@@ -123,66 +123,6 @@ static struct crypto_alg aesdriver_ecb_alg = {
 	}
 };
 
-static int 
-aesdriver_cbc_encrypt(struct blkcipher_desc *desc,
-			     struct scatterlist *dst, struct scatterlist *src,
-			     unsigned int nbytes)
-{
-	int rv;
-	struct blkcipher_walk walk;
-	printk(KERN_INFO "Encrypt cbc in aesdriver!\n");
-	blkcipher_walk_init(&walk, dst, src, nbytes);
-	rv = blkcipher_walk_virt(desc, &walk);
-	while ((walk.nbytes)) {
-		aesdriver_xor_inplace(walk.src.virt.addr, walk.iv);
-		aesdriver_write(walk.src.virt.addr, AES_MODE_ENCRYPT);
-		aesdriver_read(walk.dst.virt.addr);
-		memcpy(walk.iv, walk.dst.virt.addr, AES_BLOCK_SIZE);
-		rv = blkcipher_walk_done(desc, &walk, walk.nbytes - AES_BLOCK_SIZE);
-	}
-	return rv;
-}
-
-static int 
-aesdriver_cbc_decrypt(struct blkcipher_desc *desc,
-			     struct scatterlist *dst, struct scatterlist *src,
-			     unsigned int nbytes)
-{
-	int rv;
-	struct blkcipher_walk walk;
-	printk(KERN_INFO "Decrypt cbc in aesdriver!\n");
-	blkcipher_walk_init(&walk, dst, src, nbytes);
-	rv = blkcipher_walk_virt(desc, &walk);
-	while ((walk.nbytes)) {
-		aesdriver_write(walk.src.virt.addr, AES_MODE_DECRYPT);
-		aesdriver_read(walk.dst.virt.addr);
-		aesdriver_xor_inplace(walk.dst.virt.addr, walk.iv);
-		memcpy(walk.iv, walk.src.virt.addr, AES_BLOCK_SIZE);
-		rv = blkcipher_walk_done(desc, &walk, walk.nbytes - AES_BLOCK_SIZE);
-	}
-	return rv;
-}
-
-static struct crypto_alg aesdriver_cbc_alg = {
-	.cra_name		=	"cbc(aes)",
-	.cra_driver_name	=	"aesdriver-cbc",
-	.cra_priority		=	100,
-	.cra_flags		=	CRYPTO_ALG_TYPE_BLKCIPHER,
-	.cra_blocksize		=	AES_BLOCK_SIZE,
-	.cra_type		=	&crypto_blkcipher_type,
-	.cra_module		=	THIS_MODULE,
-	.cra_u			=	{
-		.blkcipher = {
-			.min_keysize		=	AES_KEYSIZE_128,
-			.max_keysize		=	AES_KEYSIZE_128,
-			.ivsize	   		= 	AES_BLOCK_SIZE,
-			.setkey	   		= 	aesdriver_setkey,
-			.encrypt		=	aesdriver_cbc_encrypt,
-			.decrypt		=	aesdriver_cbc_decrypt,
-		}
-	}
-};
-
 
 static int aesdriver_probe(struct platform_device *pdev)
 {
@@ -192,14 +132,11 @@ static int aesdriver_probe(struct platform_device *pdev)
 	if ((rv = crypto_register_alg(&aesdriver_ecb_alg)))
 		goto err;
 
-	if ((rv = crypto_register_alg(&aesdriver_cbc_alg)))
-		goto err_unregister_ecb;
-
 	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
 	if (res == NULL) {
 		dev_err(&pdev->dev, "No memory resource\n");
 		rv = -ENODEV;
-		goto err_unregister_cbc;
+		goto err_unregister_ecb;
 	}
 
 	remap_size = res->end - res->start + 1;
@@ -208,7 +145,7 @@ static int aesdriver_probe(struct platform_device *pdev)
 	if (request_mem_region(phys_addr, remap_size, pdev->name) == NULL) {
 		dev_err(&pdev->dev, "Cannot request IO\n");
 		rv = -ENXIO;
-		goto err_unregister_cbc;
+		goto err_unregister_ebc;
 	}
 
 	virt_addr = ioremap_nocache(phys_addr, remap_size);
@@ -224,9 +161,6 @@ static int aesdriver_probe(struct platform_device *pdev)
 err_release_mem:
 	release_mem_region(phys_addr, remap_size);
 
-err_unregister_cbc:
-	crypto_unregister_alg(&aesdriver_cbc_alg);
-
 err_unregister_ecb:
 	crypto_unregister_alg(&aesdriver_ecb_alg);
 
@@ -239,7 +173,6 @@ static int aesdriver_remove(struct platform_device *pdev)
 {
 	iounmap(virt_addr);
 	release_mem_region(phys_addr, remap_size);
-	crypto_unregister_alg(&aesdriver_cbc_alg);
 	crypto_unregister_alg(&aesdriver_ecb_alg);
 	printk(KERN_INFO "Removed aes accelerator!\n");
 	return 0;
