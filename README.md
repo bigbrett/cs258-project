@@ -71,7 +71,6 @@ and you should now see the system boot on the emulated zynq processor core. Then
 
 *NOTE: I was unable to get the openssl plugins to work on qemu. I have no idea why this is the case, but I couldnt even get my modules to build. When I was working in hardware, I was successful, however the design was in its early stages, and so unfortunately the design as you see it here is not actually validated. I only got simple hard coded values to work in hardware, but it is at least a start*
 
-
 # Running modified OpenSSL/cryptodev code 
 The Cryptodev-linux module has to be used in order to give openSSL access to our accelerators. It enables userspace application access to Crypto API backend modules already present in the kernel.
 
@@ -88,7 +87,6 @@ Since such API is not available by default on Linux distributions, the OpenSSL h
 	dch -i "Enabled cryptodev support"
 	debuild
 	sudo dpkg -i ../openssl*.deb
-
 
 # testing speed 
 	openssl speed -evp aes-128-cbc -engine cryptodev -elapsed
